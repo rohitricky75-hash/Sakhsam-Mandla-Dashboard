@@ -182,7 +182,11 @@ function detail(L,t){
  <input type="search" placeholder="Search school" value="${S.q}" oninput="S.q=this.value;clearTimeout(window._t);window._t=setTimeout(()=>{render();$('det').querySelector('input').focus()},300)"></div>
  <div style="max-height:460px;overflow:auto"><table><thead><tr><th>#</th>${S.tab=='ALL'?'<th class="l">Curriculum</th>':''}${hasBlk()&&!S.blk?'<th class="l">Block</th>':''}<th class="l">School</th><th class="l">Type</th>${hasBlk()?'<th class="l">Sankul</th>':''}<th>Code</th><th>Done</th><th>Target</th><th>%</th><th>Range ${t.rl}</th><th class="l">Status</th></tr></thead><tbody>`+
  f.map((x,i)=>{const p=x.d/x.Tx*100,c=x.d==0?'R':x.d>=x.Tx?'G':p>=75?'A':'R';return `<tr><td>${i+1}</td>${S.tab=='ALL'?`<td class="l">${cuN(x.cu)}</td>`:''}${hasBlk()&&!S.blk?`<td class="l">${x.b}</td>`:''}<td class="l">${x.n}</td><td class="l">${stype(x.n)}</td>${hasBlk()?`<td class="l">${x.k}</td>`:''}<td>${x.c}</td><td>${x.d}</td><td>${x.Tx}</td><td><div style="display:inline-block;width:60px;height:8px;background:#eef2f8;border-radius:4px;vertical-align:middle"><div style="width:${Math.min(p,100)}%;height:100%;border-radius:4px;background:${cc[c]}"></div></div> ${Math.min(p,100).toFixed(0)}%</td><td>${x.r}/${x.Wx}</td><td class="l"><span class="pill ${c}">${x.d==0?'Not reporting':x.d>=x.Tx?'Target met':'Short by '+(x.Tx-x.d)}</span></td></tr>`}).join('')+`</tbody></table></div><div class="note">Showing ${f.length} school(s).</div>`}
-function classMat(){const el=$('cm');if(S.tab!='LS'){el.innerHTML='';return}
+function classMatEE(){const el=$('cm');
+ el.innerHTML=`<h3>Class-wise status (Class 11 &amp; 12) - ${S.sk||S.blk||'Whole district'} (target till ${S.mo}) - click a row</h3><table><thead><tr><th class="l">Class</th><th>Target</th><th>Total</th><th>Reporting</th><th>Not reporting</th><th>Rep %</th><th>Ach %</th><th>Target met</th></tr></thead><tbody>`+[11,12].map(c=>{const y=c-10;
+ const t=ymo('EE',y,S.mos),l=yl('EE',y).filter(x=>(!S.blk||x.b==S.blk)&&(!S.sk||x.k==S.sk)),a=stat(l,t.hi,t.lo,t.hi,t.rs);
+ return `<tr class="cl ${S.cls==c?'sel':''}" onclick="S.cls='${c}';S.flt='all';render()"><td class="l">Class ${c}</td><td>${t.hi}</td><td>${a.T}</td><td>${a.R}</td><td><b style="color:${a.N?'#d64545':'inherit'}">${a.N}</b></td><td>${pc(a.rep)}</td><td><span class="pill ${col(a.ach)}">${pc(a.ach)}</span></td><td>${a.met}</td></tr>`}).join('')+'</tbody></table>'}
+function classMat(){const el=$('cm');if(S.tab=='EE'){classMatEE();return}if(S.tab!='LS'){el.innerHTML='';return}
  const ml=MODEL.master.filter(m=>(!S.blk||m.b==S.blk)&&(!S.sk||m.k==S.sk));
  el.innerHTML=`<h3>Class-wise status (Class 6 to 10) - ${S.sk||S.blk||'Whole district'} (target till ${S.mo}) - click a row</h3><table><thead><tr><th class="l">Class</th><th>Target</th><th>Total</th><th>Reporting</th><th>Not reporting</th><th>Rep %</th><th>Ach %</th><th>Target met</th></tr></thead><tbody>`+[6,7,8,9,10].map(c=>{const y=Math.min(c-5,3);
  const t=ymo('LS',y,S.mos),l=ml.map(m=>({s:m.s[c]||[]})).filter(x=>c<9||x.s.length),a=stat(l,t.hi,t.lo,t.hi,t.rs);
@@ -265,7 +269,7 @@ function insights(Lb,t){const el=$('ins');if(!Lb.length){el.innerHTML='';return}
  li('हर सत्र के बाद Magic Mitra (AI chatbot) पर रिपोर्टिंग अनिवार्य; बिना रिपोर्ट के सत्र गिना नहीं जाएगा।')+
  li('हर सप्ताह नया Excel data डालकर dashboard refresh करना और इस पेज का प्रिंट बैठक में रखना।')+'</ol></div></div>'}
 function setTab(k){S.tab=k;S.cls='all';S.blk=null;S.sk=null;S.flt='all';render()}
-function setYear(y){S.cls=hasBlk()?String(5+y):S.tab=='KSP'?(y==3?'8':String(5+y)):String(10+y);S.blk=null;S.sk=null;S.flt='all';render()}
+function setYear(y){S.cls=S.tab=='EE'?String(10+y):hasBlk()?String(5+y):S.tab=='KSP'?(y==3?'8':String(5+y)):String(10+y);S.blk=null;S.sk=null;S.flt='all';render()}
 function skProg(L,t){const el=$('skp'),ec=$('skc');if(!hasBlk()){el.innerHTML='';ec.innerHTML='';ec.style.display='none';return}ec.style.display=''
  const T=t.hi,m={};L.filter(x=>!S.blk||x.b==S.blk).forEach(x=>(m[x.k]=m[x.k]||{k:x.k,b:x.b,l:[]}).l.push(x));
  const G=Object.values(m).map(g=>({...g,...stat(g.l,T,t.lo,t.hi,t.rs),avg:g.l.reduce((a,x)=>a+x.s.length,0)/g.l.length})).sort((a,b)=>b.ach-a.ach);
