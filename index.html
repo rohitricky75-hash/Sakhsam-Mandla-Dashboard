@@ -268,8 +268,9 @@ function insights(Lb,t){const el=$('ins');if(!Lb.length){el.innerHTML='';return}
  li('पीछे चल रहे ब्लॉक/संकुल/विद्यालयों में आगे वाले की अच्छी प्रथाएँ (practice) साझा करना और मेंटरिंग जोड़ी बनाना।')+
  li('हर सत्र के बाद Magic Mitra (AI chatbot) पर रिपोर्टिंग अनिवार्य; बिना रिपोर्ट के सत्र गिना नहीं जाएगा।')+
  li('हर सप्ताह नया Excel data डालकर dashboard refresh करना और इस पेज का प्रिंट बैठक में रखना।')+'</ol></div></div>'}
-function setTab(k){S.tab=k;S.cls='all';S.blk=null;S.sk=null;S.flt='all';render()}
-function setYear(y){S.cls=S.tab=='EE'?String(10+y):hasBlk()?String(5+y):S.tab=='KSP'?(y==3?'8':String(5+y)):String(10+y);S.blk=null;S.sk=null;S.flt='all';render()}
+function keepSk(){if(S.sk&&!schools().some(x=>x.k==S.sk))S.sk=null}
+function setTab(k){S.tab=k;S.cls='all';keepSk();S.flt='all';render()}
+function setYear(y){S.cls=S.tab=='EE'?String(10+y):hasBlk()?String(5+y):S.tab=='KSP'?(y==3?'8':String(5+y)):String(10+y);S.flt='all';render()}
 function skProg(L,t){const el=$('skp'),ec=$('skc');if(!hasBlk()){el.innerHTML='';ec.innerHTML='';ec.style.display='none';return}ec.style.display=''
  const T=t.hi,m={};L.filter(x=>!S.blk||x.b==S.blk).forEach(x=>(m[x.k]=m[x.k]||{k:x.k,b:x.b,l:[]}).l.push(x));
  const G=Object.values(m).map(g=>({...g,...stat(g.l,T,t.lo,t.hi,t.rs),avg:g.l.reduce((a,x)=>a+x.s.length,0)/g.l.length})).sort((a,b)=>b.ach-a.ach);
@@ -282,7 +283,7 @@ function skProg(L,t){const el=$('skp'),ec=$('skc');if(!hasBlk()){el.innerHTML=''
  el.innerHTML=`<h3>Sankul-wise progress - ${S.blk||'Whole district'} (${clsLabel()}, target ${T} sessions by ${S.mo}) - click a row to filter</h3><div style="max-height:420px;overflow:auto"><table><thead><tr><th>#</th><th class="l">Sankul</th><th class="l">Block</th><th>Schools</th><th>Reporting</th><th>Not rep.</th><th>Rep %</th><th>Avg done</th><th class="l" style="min-width:170px">Progress (Ach %)</th></tr></thead><tbody>`+
  G.map((g,i)=>{const c=col(g.ach);return `<tr class="cl ${S.sk==g.k?'sel':''}" onclick="S.sk=S.sk=='${g.k.replace(/'/g,"\\'")}'?null:'${g.k.replace(/'/g,"\\'")}';S.blk='${g.b}';S.flt='all';render()"><td>${i+1}</td><td class="l">${g.k}</td><td class="l">${g.b}</td><td>${g.T}</td><td>${g.R}</td><td><b style="color:${g.N?'#d64545':'inherit'}">${g.N}</b></td><td>${pc(g.rep)}</td><td>${g.avg.toFixed(1)}/${T}</td><td class="l"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:#eef2f8;height:10px;border-radius:5px"><div style="width:${Math.min(g.ach,100)}%;height:100%;border-radius:5px;background:${cc[c]}"></div></div><b style="width:48px;text-align:right">${pc(g.ach)}</b></div></td></tr>`}).join('')+'</tbody></table></div>'}
 function range(a,b){const r=[];for(let i=a;i<=b;i++)r.push(i);return r}
-$('cls').onchange=e=>{const v=e.target.value;S.cls=v;if(S.tab!='ALL'){if(v=='11'||v=='12'){if(S.tab!='EE'){S.tab='EE';S.blk=null;S.sk=null}}else if(v=='9'||v=='10'){S.tab='LS'}else if(v!='all'&&S.tab=='EE'){S.tab='LS'}
+$('cls').onchange=e=>{const v=e.target.value;S.cls=v;if(S.tab!='ALL'){if(v=='11'||v=='12'){if(S.tab!='EE'){S.tab='EE';keepSk()}}else if(v=='9'||v=='10'){S.tab='LS'}else if(v!='all'&&S.tab=='EE'){S.tab='LS'}
  if(S.tab=='KSP'&&(v=='9'||v=='10'))S.cls='8'}S.flt='all';render()};
 $('sk').onchange=e=>{S.sk=e.target.value===''?null:window._sks[+e.target.value];if(S.sk){const x=schools().find(y=>y.k==S.sk);if(x)S.blk=x.b}S.flt='all';render()};
 $('blk').onchange=e=>{S.blk=e.target.value||null;S.sk=null;S.flt='all';render()};
